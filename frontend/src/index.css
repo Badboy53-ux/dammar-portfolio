@@ -1,0 +1,91 @@
+:root {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #eaf5ff;
+  background: #07111d;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top, rgba(92, 155, 255, 0.18), transparent 20%),
+    linear-gradient(135deg, #07111d 0%, #0f1729 48%, #100d1f 100%);
+  color: #eaf5ff;
+  transition: background 0.28s ease, color 0.28s ease;
+}
+
+body[data-theme='light'] {
+  background:
+    linear-gradient(135deg, #eef6ff 0%, #f6f9ff 38%, #eef2ff 100%);
+  color: #0d1725;
+}
+
+body[data-theme='light'] .site-header,
+body[data-theme='light'] .nav-menu,
+body[data-theme='light'] .detail-card,
+body[data-theme='light'] .project-card,
+body[data-theme='light'] .service-card,
+body[data-theme='light'] .skill-group,
+body[data-theme='light'] .language-card,
+body[data-theme='light'] .resume-panel,
+body[data-theme='light'] .contact-form,
+body[data-theme='light'] .profile-card,
+body[data-theme='light'] .stat-card {
+  background: rgba(255, 255, 255, 0.82);
+  color: #0d1725;
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+body[data-theme='light'] .hero-bio,
+body[data-theme='light'] .about-content p,
+body[data-theme='light'] .timeline-content p,
+body[data-theme='light'] .project-body p,
+body[data-theme='light'] .detail-card p,
+body[data-theme='light'] .service-card p,
+body[data-theme='light'] .footer-tagline,
+body[data-theme='light'] .contact-copy a,
+body[data-theme='light'] .footer-links,
+body[data-theme='light'] .brand-text,
+body[data-theme='light'] .nav-menu a,
+body[data-theme='light'] .section-heading p,
+body[data-theme='light'] .social-link,
+body[data-theme='light'] .field-grid label,
+body[data-theme='light'] .contact-form label,
+body[data-theme='light'] .search-box span {
+  color: #1b2d3d;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}
