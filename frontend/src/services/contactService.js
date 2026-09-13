@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API_URL } from './apiConfig'
 
 export const submitContactForm = async (formData) => {
   try {
@@ -17,11 +17,10 @@ export const submitContactForm = async (formData) => {
 
     return await response.json()
   } catch (error) {
-    console.warn('Contact API unavailable. Falling back to demo mode.', error)
+    console.warn('Contact API unavailable.', error)
     return {
-      success: true,
-      message: 'Your message has been queued successfully. Connect the backend to persist messages in MySQL.',
-      demoMode: true,
+      success: false,
+      message: 'Unable to send your message right now. Please try again later.',
     }
   }
 }

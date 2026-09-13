@@ -10,8 +10,15 @@ import certifications from './data/certifications'
 import collegeProjects from './data/collegeProjects'
 import websites from './data/websites'
 import nationalProjects from './data/nationalProjects'
-import { submitContactForm } from './services/contactService'
 import { getDataHealth, loadPortfolioData } from './services/portfolioService'
+import Button from './components/Button'
+import SectionHeading from './components/SectionHeading'
+import Hero from './components/Hero'
+import Skills from './components/Skills'
+import Projects from './components/Projects'
+import ContactSection from './components/ContactSection'
+import DashboardSection from './components/DashboardSection'
+import { slugify } from './components/slugify'
 
 const fallbackPortfolio = {
   projects,
@@ -27,63 +34,12 @@ const fallbackPortfolio = {
   programmingLanguages,
 }
 
-const socialLinks = [
-  { label: 'GitHub', href: profile.github, icon: 'GH' },
-  { label: 'LinkedIn', href: profile.linkedin, icon: 'in' },
-  { label: 'Facebook', href: profile.facebook, icon: 'f' },
-  { label: 'Instagram', href: profile.instagram, icon: 'ig' },
-  { label: 'TikTok', href: profile.tiktok, icon: 'tk' },
-  { label: 'Email', href: `mailto:${profile.email}`, icon: '@' },
-]
-
-const initialForm = {
-  name: '',
-  email: '',
-  phone: '',
-  subject: '',
-  message: '',
-}
-
-function Button({ children, variant = 'primary', href, className = '', ...props }) {
-  const classes = `btn btn-${variant} ${className}`.trim()
-
-  if (href) {
-    return (
-      <a className={classes} href={href} {...props}>
-        {children}
-      </a>
-    )
-  }
-
-  return (
-    <button className={classes} type="button" {...props}>
-      {children}
-    </button>
-  )
-}
-
-function SectionHeading({ eyebrow, title, subtitle }) {
-  return (
-    <div className="section-heading">
-      <span className="eyebrow">{eyebrow}</span>
-      <h2>{title}</h2>
-      {subtitle ? <p>{subtitle}</p> : null}
-    </div>
-  )
-}
-
 function App() {
   const [theme, setTheme] = useState('dark')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [activeFilter, setActiveFilter] = useState('All')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [formData, setFormData] = useState(initialForm)
-  const [formErrors, setFormErrors] = useState({})
   const [progress, setProgress] = useState(0)
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [toast, setToast] = useState('')
-  const [copyState, setCopyState] = useState('')
-  const [expandedProjectId, setExpandedProjectId] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
   const [portfolio, setPortfolio] = useState(fallbackPortfolio)
@@ -142,78 +98,18 @@ function App() {
     return () => window.removeEventListener('popstate', handlePathChange)
   }, [])
 
-  const projectList = portfolio.projects ?? projects
-  const skillList = portfolio.skillGroups ?? skillGroups
-  const servicesList = portfolio.services ?? services
-  const experienceList = portfolio.experience ?? experience
-  const educationList = portfolio.education ?? education
-  const certificationList = portfolio.certifications ?? certifications
-  const collegeList = portfolio.collegeProjects ?? collegeProjects
-  const websiteList = portfolio.websites ?? websites
-  const nationalList = portfolio.nationalProjects ?? nationalProjects
-  const fullStackList = portfolio.fullStackFlow ?? fullStackFlow
-  const languageList = portfolio.programmingLanguages ?? programmingLanguages
-  const availableProjectFilters = ['All', ...new Set(projectList.map((project) => project.category))]
-
-  const filteredProjects = useMemo(() => {
-    const search = searchTerm.trim().toLowerCase()
-
-    return projectList.filter((project) => {
-      const matchesFilter = activeFilter === 'All' || project.category === activeFilter
-      const matchesSearch =
-        !search ||
-        [project.title, project.category, project.description, project.technologies.join(' ')]
-          .join(' ')
-          .toLowerCase()
-          .includes(search)
-
-      return matchesFilter && matchesSearch
-    })
-  }, [activeFilter, searchTerm, projectList])
-
-  const handleFormChange = (event) => {
-    const { name, value } = event.target
-    setFormData((previous) => ({ ...previous, [name]: value }))
-    setFormErrors((previous) => ({ ...previous, [name]: '' }))
-  }
-
-  const validateForm = () => {
-    const errors = {}
-
-    if (!formData.name.trim()) errors.name = 'Name is required.'
-    if (!formData.email.trim()) errors.email = 'Email is required.'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Please enter a valid email.'
-    if (!formData.subject.trim()) errors.subject = 'Subject is required.'
-    if (!formData.message.trim()) errors.message = 'Message is required.'
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
-    if (!validateForm()) {
-      setToast('Please review the highlighted fields.')
-      return
-    }
-
-    const response = await submitContactForm(formData)
-    setToast(response.message || 'Message sent successfully.')
-    setFormData(initialForm)
-    setFormErrors({})
-  }
-
-  const handleCopyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(profile.email)
-      setCopyState('Copied!')
-      setToast('Email copied to clipboard.')
-    } catch {
-      setCopyState('Copy failed')
-      setToast('Unable to copy email automatically.')
-    }
-  }
+  const projectList = portfolio.projects || projects
+  const skillList = portfolio.skillGroups || skillGroups
+  const servicesList = portfolio.services || services
+  const experienceList = portfolio.experience || experience
+  const educationList = portfolio.education || education
+  const certificationList = portfolio.certifications || certifications
+  const collegeList = portfolio.collegeProjects || collegeProjects
+  const websiteList = portfolio.websites || websites
+  const nationalList = portfolio.nationalProjects || nationalProjects
+  const fullStackList = portfolio.fullStackFlow || fullStackFlow
+  const languageList = portfolio.programmingLanguages || programmingLanguages
+  const skillCount = skillList.reduce((total, group) => total + (group.skills?.length ?? 0), 0)
 
   const isNotFound = currentPath !== '/' && currentPath !== ''
 
@@ -256,7 +152,7 @@ function App() {
 
           <nav className={`nav-menu ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
             {profile.navItems.map((item) => {
-              const sectionId = item.toLowerCase().replace(/\s+/g, '-')
+              const sectionId = slugify(item)
               return (
                 <a key={item} href={`#${sectionId}`} onClick={() => setMobileMenuOpen(false)}>
                   {item}
@@ -282,35 +178,7 @@ function App() {
       </header>
 
       <main>
-        <section id="home" className="hero section">
-          <div className="container hero-grid">
-            <div className="hero-copy">
-              <p className="intro-line">{profile.intro}</p>
-              <h1>{profile.title}</h1>
-              <p className="hero-role">{profile.professionalTitle}</p>
-              <p className="hero-tagline">{profile.tagline}</p>
-              <p className="hero-bio">{profile.bio}</p>
-
-              <div className="hero-actions">
-                <Button href="#projects">View My Projects</Button>
-                <Button href={profile.cv} variant="secondary" target="_blank" rel="noreferrer" download="Dammar-BK-CV.html">
-                  Download CV
-                </Button>
-                <Button href="#contact" variant="ghost">Hire Me</Button>
-                <Button href="#contact" variant="secondary">Contact Me</Button>
-              </div>
-
-              <div className="social-row" aria-label="Social links">
-                {socialLinks.map((link) => (
-                  <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className={`social-link social-${link.label.toLowerCase()}`} aria-label={`Open ${link.label}`} title={`Open ${link.label}`}>
-                    {link.icon}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </section>
+        <Hero />
 
         <section id="about" className="section">
           <div className="container about-grid">
@@ -344,7 +212,7 @@ function App() {
               <div className="stat-grid">
                 {[
                   { value: `${projectList.length}+`, label: 'Projects Completed' },
-                  { value: `${skillList.reduce((total, group) => total + (group.skills?.length ?? 0), 0)}+`, label: 'Skills & Tools' },
+                  { value: `${skillCount}+`, label: 'Skills & Tools' },
                   { value: `${collegeList.length}+`, label: 'College Projects' },
                   { value: `${websiteList.length}+`, label: 'Websites Developed' },
                 ].map((item) => (
@@ -358,57 +226,7 @@ function App() {
           </div>
         </section>
 
-        <section id="skills" className="section alt-section">
-          <div className="container">
-            <SectionHeading eyebrow="My Skills" title="Skills & Technologies" subtitle="Focused on engineering, product thinking and practical implementation." />
-
-            <div className="skill-groups">
-              {skillList.map((group) => (
-                <div key={group.title} className="skill-group">
-                  <h3>{group.title}</h3>
-                  <div className="chip-list">
-                    {group.skills.map((skill) => (
-                      <span key={skill} className="chip">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="tech-stack-panel">
-              <div className="stack-header">
-                <h3>Full-Stack Development</h3>
-              </div>
-              <div className="stack-flow" aria-label="Full-stack development stack">
-                {fullStackList.map((item, index) => (
-                  <div key={item} className="stack-item">
-                    <span>{item}</span>
-                    {index < fullStackFlow.length - 1 ? <span className="stack-arrow">↓</span> : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="language-panel">
-              <div className="language-header">
-                <h3>Programming Languages</h3>
-              </div>
-              <div className="language-list">
-                {languageList.map((language) => (
-                  <div key={language.name} className="language-card">
-                    <div className="language-name-row">
-                      <strong>{language.name}</strong>
-                      <span>{language.level}</span>
-                    </div>
-                    <div className="progress-bar">
-                      <span style={{ width: language.name === 'JavaScript' ? '80%' : language.name === 'SQL' ? '75%' : language.name === 'Python' ? '60%' : '50%' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <Skills skillList={skillList} fullStackList={fullStackList} languageList={languageList} />
 
         <section id="services" className="section">
           <div className="container">
@@ -426,84 +244,7 @@ function App() {
           </div>
         </section>
 
-        <section id="projects" className="section alt-section">
-          <div className="container">
-            <SectionHeading eyebrow="My Projects" title="Featured Work" subtitle="A curated selection of development work and technical experiments." />
-
-            <div className="toolbar">
-              <div className="filter-list" aria-label="Project filters">
-                {availableProjectFilters.map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    className={filter === activeFilter ? 'filter-chip is-active' : 'filter-chip'}
-                    onClick={() => setActiveFilter(filter)}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-
-              <label className="search-box" aria-label="Search projects">
-                <span>Search</span>
-                <input
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search project name or technology"
-                />
-              </label>
-            </div>
-
-            {filteredProjects.length ? (
-              <div className="projects-grid">
-                {filteredProjects.map((project) => (
-                  <article key={project.id} className="project-card modern-card">
-                    <div className="project-body">
-                      <div className="project-meta">
-                        <span>{project.category}</span>
-                        {project.featured ? <span className="featured-pill">Featured</span> : null}
-                      </div>
-                      <h3>{project.title}</h3>
-                      <p>{project.description}</p>
-                      <div className="tech-tags">
-                        {project.technologies.map((technology) => (
-                          <span key={technology}>{technology}</span>
-                        ))}
-                      </div>
-                      {expandedProjectId === project.id ? (
-                        <div className="project-details">
-                          <strong>Project focus</strong>
-                          <p>Designed around practical delivery, responsive user experience and maintainable technical implementation.</p>
-                        </div>
-                      ) : null}
-                      <div className="project-actions">
-                        <a href={project.github} target="_blank" rel="noreferrer" className="inline-link">
-                          GitHub
-                        </a>
-                        <a href={project.live} target="_blank" rel="noreferrer" className="inline-link">
-                          Live Demo
-                        </a>
-                        <button
-                          type="button"
-                          className="inline-link button-like"
-                          onClick={() => setExpandedProjectId((currentId) => (currentId === project.id ? null : project.id))}
-                          aria-expanded={expandedProjectId === project.id}
-                        >
-                          {expandedProjectId === project.id ? 'Hide Details' : 'View Details'}
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No project matches your search criteria. Try another filter or keyword.</p>
-              </div>
-            )}
-          </div>
-        </section>
+        <Projects projectList={projectList} />
 
         <section id="college-projects" className="section">
           <div className="container">
@@ -680,108 +421,16 @@ function App() {
           </div>
         </section>
 
-        <section id="contact" className="section alt-section">
-          <div className="container contact-panel">
-            <div className="contact-copy">
-              <SectionHeading eyebrow="Open to Opportunities" title="Let’s Build Something Great Together." subtitle="Open to Software Engineering, Full-Stack Development, Web Development and technology-related opportunities." />
-              <div className="contact-meta">
-                <a href={`mailto:${profile.email}`}>{profile.email}</a>
-                <a href={`tel:${profile.phone}`}>{profile.phone}</a>
-                <a href={profile.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
-                <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
-                <a href={profile.facebook} target="_blank" rel="noreferrer">Facebook</a>
-                <a href={profile.instagram} target="_blank" rel="noreferrer">Instagram</a>
-                <a href={profile.tiktok} target="_blank" rel="noreferrer">TikTok</a>
-              </div>
-              <div className="copy-email-row">
-                <button type="button" className="inline-link button-like" onClick={handleCopyEmail}>
-                  {copyState ? copyState : 'Copy Email'}
-                </button>
-              </div>
-            </div>
+        <ContactSection onNotify={setToast} />
 
-            <form className="contact-form" onSubmit={handleSubmit} noValidate>
-              <div className="field-grid">
-                <label>
-                  <span>Name</span>
-                  <input type="text" name="name" value={formData.name} onChange={handleFormChange} placeholder="Your name" autoComplete="name" aria-invalid={Boolean(formErrors.name)} />
-                  {formErrors.name ? <small>{formErrors.name}</small> : null}
-                </label>
-                <label>
-                  <span>Email</span>
-                  <input type="email" name="email" value={formData.email} onChange={handleFormChange} placeholder="your@email.com" autoComplete="email" aria-invalid={Boolean(formErrors.email)} />
-                  {formErrors.email ? <small>{formErrors.email}</small> : null}
-                </label>
-              </div>
-
-              <div className="field-grid">
-                <label>
-                  <span>Phone</span>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleFormChange} placeholder="Optional phone number" autoComplete="tel" />
-                </label>
-                <label>
-                  <span>Subject</span>
-                  <input type="text" name="subject" value={formData.subject} onChange={handleFormChange} placeholder="Project inquiry" aria-invalid={Boolean(formErrors.subject)} />
-                  {formErrors.subject ? <small>{formErrors.subject}</small> : null}
-                </label>
-              </div>
-
-              <label>
-                <span>Message</span>
-                <textarea name="message" value={formData.message} onChange={handleFormChange} rows="6" placeholder="Tell me about your project or opportunity." aria-invalid={Boolean(formErrors.message)} />
-                {formErrors.message ? <small>{formErrors.message}</small> : null}
-              </label>
-
-              <Button type="submit" className="submit-btn">Send Inquiry</Button>
-            </form>
-          </div>
-        </section>
-
-        <section id="dashboard" className="section alt-section">
-          <div className="container">
-            <SectionHeading eyebrow="Admin Dashboard" title="Content Control Center" subtitle="Portfolio health, sync status and content coverage overview." />
-
-            <div className="dashboard-grid">
-              <div className="dashboard-panel">
-                <div className="meta-row">
-                  <span className="status-badge">{syncStatusText}</span>
-                </div>
-                <div className="metric-grid">
-                  {adminMetrics.map((metric) => (
-                    <div key={metric.label} className={`metric-card ${metric.tone}`}>
-                      <span>{metric.label}</span>
-                      <strong>{metric.value}</strong>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="dashboard-panel table-panel">
-                <h3>Portfolio sync</h3>
-                <table className="sync-table">
-                  <tbody>
-                    <tr>
-                      <td>Primary data source</td>
-                      <td>{portfolio.source === 'backend' ? 'Express API' : 'Local file dataset'}</td>
-                    </tr>
-                    <tr>
-                      <td>Skills inventory</td>
-                      <td>{skillList.reduce((total, group) => total + (group.skills?.length ?? 0), 0)}</td>
-                    </tr>
-                    <tr>
-                      <td>Project coverage</td>
-                      <td>{projectList.length} active items</td>
-                    </tr>
-                    <tr>
-                      <td>Portfolio state</td>
-                      <td>{isLoading ? 'Loading…' : 'Ready for review'}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
+        <DashboardSection
+          adminMetrics={adminMetrics}
+          syncStatusText={syncStatusText}
+          skillCount={skillCount}
+          projectCount={projectList.length}
+          isLoading={isLoading}
+          dataSource={portfolio.source === 'backend' ? 'Express API' : 'Local file dataset'}
+        />
       </main>
 
       <footer className="site-footer">
@@ -796,7 +445,7 @@ function App() {
             <h4>Quick Links</h4>
             <ul className="footer-links">
               {profile.navItems.map((item) => {
-                const sectionId = item.toLowerCase().replace(/\s+/g, '-')
+                const sectionId = slugify(item)
                 return <li key={item}><a href={`#${sectionId}`}>{item}</a></li>
               })}
             </ul>

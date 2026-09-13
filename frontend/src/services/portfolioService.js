@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API_URL } from './apiConfig'
 
 export const loadPortfolioData = async () => {
   try {
@@ -10,14 +10,15 @@ export const loadPortfolioData = async () => {
 
     const payload = await response.json()
 
-    if (payload?.success && payload.data) {
-      return {
-        ...payload.data,
-        source: 'backend',
-      }
+    if (!payload?.success || !payload.data) {
+      console.warn('Portfolio API returned an unexpected payload. Using local data.')
+      return null
     }
 
-    return payload
+    return {
+      ...payload.data,
+      source: 'backend',
+    }
   } catch (error) {
     console.warn('Portfolio API unavailable. Using local data.', error)
     return null

@@ -1,0 +1,42 @@
+# Render Blueprint for the Dammar B.K. portfolio backend (Express + MySQL).
+# Usage: push this repo to GitHub, then in Render choose
+# "New +" -> "Blueprint" and point it at this repository.
+#
+# After the service is created, open the service -> Environment and fill in the
+# secret values (sync: false keys are intentionally left blank here so they are
+# never committed). Set CLIENT_URL to your deployed frontend origin, e.g.
+# https://dammar-portfolio.vercel.app
+services:
+  - type: web
+    name: dammar-portfolio-backend
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: PORT
+        value: "5000"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SSL_REJECT_UNAUTHORIZED
+        value: "true"
+      - key: DB_CONNECTION_LIMIT
+        value: "10"
+      - key: CLIENT_URL
+        sync: false

@@ -37,6 +37,6 @@ app.use('/api/portfolio', portfolioRoutes)
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend running on http://localhost:${PORT}`)
 })

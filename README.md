@@ -169,9 +169,13 @@ frontend/public/Dammar-BK-CV.pdf
 The portfolio already uses this file from the `profile.cv` config entry.
 
 ## Deployment
+A complete, step-by-step hosting walkthrough lives in [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+The short version: host the frontend on **Vercel** (`frontend/vercel.json`) and the
+backend on **Render** (`render.yaml`, which includes a `/api/health` health check),
+with a free managed **MySQL** database; `backend/Dockerfile` covers Railway, Fly.io,
+Cloud Run and VPS hosts.
 
 ### Frontend deployment
-
 Use any static host such as Vercel, Netlify or GitHub Pages.
 
 ```bash

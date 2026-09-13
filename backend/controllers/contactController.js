@@ -26,10 +26,7 @@ export const createContactMessage = async (req, res, next) => {
     })
   } catch (error) {
     console.error('Contact save failed:', error)
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to save contact message. Please try again later.',
-    })
+    return next(error)
   }
 }
 
